@@ -1,0 +1,9 @@
+#!/bin/bash
+
+function open_index() {
+	sleep 1
+	open http://localhost:8000
+}
+
+open_index &
+python -m SimpleHTTPServer
