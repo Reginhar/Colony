@@ -32,15 +32,15 @@ function create ()
     soil.displayWidth = width;
     soil.displayHeight = height / 2;
     soil.refreshBody();
-    anthill = soilGroup.create(width / 2, height / 2, 'anthill');
+    anthill = soilGroup.create(width / 2, height / 2, 'anthill').setOrigin(0.5, 1);
 
-    ant = this.physics.add.sprite(width / 2, height / 2, 'ant');
+    ant = this.physics.add.sprite(width / 2, height / 2, 'ant').setOrigin(0.5, 1);
     ant.isCarryingFood = false;
 
     // Add some food
     foods = this.physics.add.group();
     for (i = 0; i < 10; i++) {
-        foods.create(Phaser.Math.Between(0, width), height / 2, 'food');
+        foods.create(Phaser.Math.Between(0, width), height / 2, 'food').setOrigin(0.5, 1);
     }
 
     this.anims.create({
