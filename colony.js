@@ -27,6 +27,8 @@ function preload ()
 
 function create ()
 {
+    this.cameras.main.setBackgroundColor("87ceeb");
+
     soilGroup = this.physics.add.staticGroup();
     soil = soilGroup.create(width, height, 'soil');
     soil.displayWidth = width;
