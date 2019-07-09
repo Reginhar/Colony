@@ -38,7 +38,9 @@ function create ()
     ant.setCollideWorldBounds(true);
     antAgent = {
         sprite: ant,
-        isCarryingFood: false
+        isCarryingFood: false,
+        isGoingHome: false,
+        justDeliveredFood: true
     };
 
     // Add some food
@@ -70,9 +72,21 @@ function create ()
 }
 
 function update () {
-    if (!antAgent.isCarryingFood) {
+    if (antAgent.isCarryingFood && !antAgent.isGoingHome) {
+        antX = antAgent.sprite.getCenter().x;
+        anthillX = anthill.getCenter().x;
+        if (antX < anthillX) {
+            antAgent.sprite.setVelocityX(100);
+            antAgent.sprite.anims.play('right', true);
+        } else if (anthillX < antX) {
+            antAgent.sprite.setVelocityX(-100);
+            antAgent.sprite.anims.play('left', true);
+        }
+        antAgent.isGoingHome = true;
+    } else if (!antAgent.isCarryingFood) {
         random = Phaser.Math.FloatBetween(0.0, 1.0);
-        if (random < 0.01) {
+        if (random < 0.01 || antAgent.justDeliveredFood) {
+            antAgent.justDeliveredFood = false;
             velocity = Phaser.Math.Between(-300, 300);
             antAgent.sprite.setVelocityX(velocity);
             if (velocity < 0) {
@@ -87,14 +101,16 @@ function update () {
 }
 
 function collectFood (ant, food) {
-    if (!ant.isCarryingFood) {
+    if (!antAgent.isCarryingFood) {
         food.disableBody(true, true);
-        ant.isCarryingFood = true;
+        antAgent.isCarryingFood = true;
     }
 }
 
 function deliverFood(ant) {
-    if (ant.isCarryingFood) {
-        ant.isCarryingFood = false;
+    if (antAgent.isCarryingFood) {
+        antAgent.isCarryingFood = false;
+        antAgent.isGoingHome = false;
+        antAgent.justDeliveredFood = true;
     }
 }
