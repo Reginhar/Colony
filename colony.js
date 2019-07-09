@@ -34,14 +34,19 @@ function create ()
     soil.refreshBody();
     anthill = soilGroup.create(width / 2, height / 2, 'anthill').setOrigin(0.5, 1);
 
-    ant = this.physics.add.sprite(width / 2, height / 2, 'ant').setOrigin(0.5, 1);
-    ant.setCollideWorldBounds(true);
-    antAgent = {
-        sprite: ant,
-        isCarryingFood: false,
-        isGoingHome: false,
-        justDeliveredFood: true
-    };
+    ants = [];
+    for (i = 0; i < 5; i++) {
+        ant = this.physics.add.sprite(width / 2, height / 2, 'ant').setOrigin(0.5, 1);
+        ant.setCollideWorldBounds(true);
+        antAgent = {
+            sprite: ant,
+            isCarryingFood: false,
+            isGoingHome: false,
+            justDeliveredFood: true
+        };
+        ant.agent = antAgent;
+        ants[i] = antAgent;
+    }
 
     // Add some food
     foods = this.physics.add.group();
@@ -67,50 +72,56 @@ function create ()
         repeat: -1
     });
 
-    this.physics.add.overlap(ant, foods, collectFood, null, this);
-    this.physics.add.overlap(ant, anthill, deliverFood, null, this);
+    for (i = 0; i < ants.length; i++) {
+        this.physics.add.overlap(ants[i].sprite, foods, collectFood, null, this);
+        this.physics.add.overlap(ants[i].sprite, anthill, deliverFood, null, this);
+    }
 }
 
 function update () {
-    if (antAgent.isCarryingFood && !antAgent.isGoingHome) {
-        antX = antAgent.sprite.getCenter().x;
-        anthillX = anthill.getCenter().x;
-        if (antX < anthillX) {
-            antAgent.sprite.setVelocityX(100);
-            antAgent.sprite.anims.play('right', true);
-        } else if (anthillX < antX) {
-            antAgent.sprite.setVelocityX(-100);
-            antAgent.sprite.anims.play('left', true);
-        }
-        antAgent.isGoingHome = true;
-    } else if (!antAgent.isCarryingFood) {
-        random = Phaser.Math.FloatBetween(0.0, 1.0);
-        if (random < 0.01 || antAgent.justDeliveredFood) {
-            antAgent.justDeliveredFood = false;
-            velocity = Phaser.Math.Between(-300, 300);
-            antAgent.sprite.setVelocityX(velocity);
-            if (velocity < 0) {
-                antAgent.sprite.anims.play('left', true);
-            } else if (velocity == 0) {
-                antAgent.sprite.anims.play('stationary');
-            } else {
+    for (i = 0; i < ants.length; i++) {
+        antAgent = ants[i];
+        if (antAgent.isCarryingFood && !antAgent.isGoingHome) {
+            antX = antAgent.sprite.getCenter().x;
+            anthillX = anthill.getCenter().x;
+            if (antX < anthillX) {
+                antAgent.sprite.setVelocityX(100);
                 antAgent.sprite.anims.play('right', true);
+            } else if (anthillX < antX) {
+                antAgent.sprite.setVelocityX(-100);
+                antAgent.sprite.anims.play('left', true);
+            }
+            antAgent.isGoingHome = true;
+        } else if (!antAgent.isCarryingFood) {
+            // TODO currently this depends on the update rate, which is bad
+            random = Phaser.Math.FloatBetween(0.0, 1.0);
+            if (random < 0.01 || antAgent.justDeliveredFood) {
+                antAgent.justDeliveredFood = false;
+                velocity = Phaser.Math.Between(-300, 300);
+                antAgent.sprite.setVelocityX(velocity);
+                if (velocity < 0) {
+                    antAgent.sprite.anims.play('left', true);
+                } else if (velocity == 0) {
+                    antAgent.sprite.anims.play('stationary');
+                } else {
+                    antAgent.sprite.anims.play('right', true);
+                }
             }
         }
     }
 }
 
 function collectFood (ant, food) {
-    if (!antAgent.isCarryingFood) {
+    if (!ant.agent.isCarryingFood) {
         food.disableBody(true, true);
-        antAgent.isCarryingFood = true;
+        ant.agent.isCarryingFood = true;
     }
 }
 
 function deliverFood(ant) {
-    if (antAgent.isCarryingFood) {
-        antAgent.isCarryingFood = false;
-        antAgent.isGoingHome = false;
-        antAgent.justDeliveredFood = true;
+    if (ant.agent.isCarryingFood) {
+        ant.agent.isCarryingFood = false;
+        ant.agent.isGoingHome = false;
+        ant.agent.justDeliveredFood = true;
     }
 }
