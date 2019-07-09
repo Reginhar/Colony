@@ -20,6 +20,7 @@ var game = new Phaser.Game(config);
 function preload ()
 {
     this.load.image('soil', 'assets/soil.png');
+    this.load.image('anthill', 'assets/anthill.png');
     this.load.image('food', 'assets/food.png');
     this.load.spritesheet('ant', 'assets/ant.png', {frameWidth: 32, frameHeight: 23});
 }
@@ -31,8 +32,10 @@ function create ()
     soil.displayWidth = width;
     soil.displayHeight = height / 2;
     soil.refreshBody();
+    anthill = soilGroup.create(width / 2, height / 2, 'anthill');
 
     ant = this.physics.add.sprite(width / 2, height / 2, 'ant');
+    ant.isCarryingFood = false;
 
     // Add some food
     foods = this.physics.add.group();
@@ -61,6 +64,7 @@ function create ()
     cursors = this.input.keyboard.createCursorKeys();
 
     this.physics.add.overlap(ant, foods, collectFood, null, this);
+    this.physics.add.overlap(ant, anthill, deliverFood, null, this);
 }
 
 function update () {
@@ -77,5 +81,14 @@ function update () {
 }
 
 function collectFood (ant, food) {
-    food.disableBody(true, true);
+    if (!ant.isCarryingFood) {
+        food.disableBody(true, true);
+        ant.isCarryingFood = true;
+    }
+}
+
+function deliverFood(ant) {
+    if (ant.isCarryingFood) {
+        ant.isCarryingFood = false;
+    }
 }
