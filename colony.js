@@ -35,7 +35,11 @@ function create ()
     anthill = soilGroup.create(width / 2, height / 2, 'anthill').setOrigin(0.5, 1);
 
     ant = this.physics.add.sprite(width / 2, height / 2, 'ant').setOrigin(0.5, 1);
-    ant.isCarryingFood = false;
+    ant.setCollideWorldBounds(true);
+    antAgent = {
+        sprite: ant,
+        isCarryingFood: false
+    };
 
     // Add some food
     foods = this.physics.add.group();
@@ -61,22 +65,24 @@ function create ()
         repeat: -1
     });
 
-    cursors = this.input.keyboard.createCursorKeys();
-
     this.physics.add.overlap(ant, foods, collectFood, null, this);
     this.physics.add.overlap(ant, anthill, deliverFood, null, this);
 }
 
 function update () {
-    if (cursors.left.isDown) {
-        ant.setVelocityX(-200);
-        ant.anims.play('left', true);
-    } else if (cursors.right.isDown) {
-        ant.setVelocityX(200);
-        ant.anims.play('right', true);
-    } else {
-        ant.setVelocityX(0);
-        ant.anims.play('stationary');
+    if (!antAgent.isCarryingFood) {
+        random = Phaser.Math.FloatBetween(0.0, 1.0);
+        if (random < 0.01) {
+            velocity = Phaser.Math.Between(-300, 300);
+            antAgent.sprite.setVelocityX(velocity);
+            if (velocity < 0) {
+                antAgent.sprite.anims.play('left', true);
+            } else if (velocity == 0) {
+                antAgent.sprite.anims.play('stationary');
+            } else {
+                antAgent.sprite.anims.play('right', true);
+            }
+        }
     }
 }
 
